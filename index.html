@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RETRO FIGHTER</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(45deg, #1a0033, #330066, #1a0033);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            color: #00ff00;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: 900;
+            color: #ff0080;
+            text-shadow: 0 0 20px #ff0080, 0 0 40px #ff0080;
+            margin-bottom: 30px;
+            animation: neonPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes neonPulse {
+            from { text-shadow: 0 0 20px #ff0080, 0 0 40px #ff0080; }
+            to { text-shadow: 0 0 30px #ff0080, 0 0 60px #ff0080, 0 0 80px #ff0080; }
+        }
+
+        .game-screen {
+            background: linear-gradient(180deg, #000033, #000066);
+            border: 4px solid #00ffff;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 30px #00ffff, inset 0 0 30px rgba(0, 255, 255, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .health-bars {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .player-info {
+            flex: 1;
+            text-align: center;
+        }
+
+        .player-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #00ff00;
+        }
+
+        .health-bar-container {
+            background: #330000;
+            border: 2px solid #ff0000;
+            border-radius: 10px;
+            height: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .health-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ffff00, #00ff00);
+            transition: width 0.5s ease;
+            border-radius: 8px;
+        }
+
+        .health-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: 700;
+            color: white;
+            text-shadow: 1px 1px 2px black;
+            z-index: 10;
+        }
+
+        .battle-arena {
+            background: linear-gradient(180deg, #001133, #002266);
+            border: 3px solid #ffff00;
+            border-radius: 10px;
+            height: 300px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding: 20px 50px;
+        }
+
+        .fighter {
+            width: 100px;
+            height: 140px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .fighter.attacking {
+            animation: attackMove 0.6s ease;
+        }
+
+        .fighter.hit {
+            animation: hitFlash 0.5s ease;
+        }
+
+        .fighter.idle {
+            animation: idleBreathe 3s ease-in-out infinite;
+        }
+
+        @keyframes attackMove {
+            0% { transform: translateX(0); }
+            30% { transform: translateX(20px) scale(1.1); }
+            100% { transform: translateX(0); }
+        }
+
+        .fighter.player2.attacking {
+            animation: attackMoveLeft 0.6s ease;
+        }
+
+        @keyframes attackMoveLeft {
+            0% { transform: translateX(0); }
+            30% { transform: translateX(-20px) scale(1.1); }
+            100% { transform: translateX(0); }
+        }
+
+        @keyframes hitFlash {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(2) hue-rotate(180deg); }
+        }
+
+        @keyframes idleBreathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .fighter-character {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .fighter-head {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            margin-bottom: 5px;
+            border: 2px solid;
+            position: relative;
+        }
+
+        .fighter-body {
+            width: 20px;
+            height: 40px;
+            border-radius: 10px;
+            margin-bottom: 5px;
+            border: 2px solid;
+            position: relative;
+        }
+
+        .fighter-arms {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 30px;
+        }
+
+        .arm {
+            width: 15px;
+            height: 25px;
+            border-radius: 8px;
+            border: 2px solid;
+            animation: armSwing 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes armSwing {
+            0% { transform: rotate(-10deg); }
+            100% { transform: rotate(10deg); }
+        }
+
+        .fighter-legs {
+            display: flex;
+            gap: 5px;
+        }
+
+        .leg {
+            width: 12px;
+            height: 35px;
+            border-radius: 6px;
+            border: 2px solid;
+            animation: legWalk 1.5s ease-in-out infinite alternate;
+        }
+
+        .leg:nth-child(2) {
+            animation-delay: 0.75s;
+        }
+
+        @keyframes legWalk {
+            0% { transform: rotate(-5deg); }
+            100% { transform: rotate(5deg); }
+        }
+
+        .fighter-face {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 8px;
+        }
+
+        /* Player 1 styling */
+        .player1 .fighter-head {
+            background: linear-gradient(45deg, #ffdbac, #f4c2a1);
+            border-color: #00ffff;
+        }
+
+        .player1 .fighter-body {
+            background: linear-gradient(45deg, #0066ff, #00aaff);
+            border-color: #00ffff;
+        }
+
+        .player1 .arm {
+            background: linear-gradient(45deg, #ffdbac, #f4c2a1);
+            border-color: #00ffff;
+        }
+
+        .player1 .leg {
+            background: linear-gradient(45deg, #003366, #004488);
+            border-color: #00ffff;
+        }
+
+        /* Player 2 styling */
+        .player2 .fighter-head {
+            background: linear-gradient(45deg, #d4a574, #c49464);
+            border-color: #ffff00;
+        }
+
+        .player2 .fighter-body {
+            background: linear-gradient(45deg, #ff6600, #ffaa00);
+            border-color: #ffff00;
+        }
+
+        .player2 .arm {
+            background: linear-gradient(45deg, #d4a574, #c49464);
+            border-color: #ffff00;
+        }
+
+        .player2 .leg {
+            background: linear-gradient(45deg, #663300, #884400);
+            border-color: #ffff00;
+        }
+
+        /* Special attack animations */
+        .fighter.special-attack .arm {
+            animation: specialAttack 0.6s ease;
+        }
+
+        @keyframes specialAttack {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(45deg) scale(1.2); }
+            100% { transform: rotate(0deg) scale(1); }
+        }
+
+        /* Block animation */
+        .fighter.blocking .arm {
+            animation: blockPose 0.3s ease forwards;
+        }
+
+        @keyframes blockPose {
+            to { transform: rotate(-45deg) translateY(-10px); }
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .control-panel {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .control-title {
+            text-align: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #00ffff;
+        }
+
+        .control-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .control-btn {
+            background: linear-gradient(45deg, #004400, #006600);
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+            color: #00ff00;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(45deg, #006600, #008800);
+            box-shadow: 0 0 15px #00ff00;
+            transform: translateY(-2px);
+        }
+
+        .control-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        .game-status {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .winner {
+            color: #ffff00;
+            text-shadow: 0 0 20px #ffff00;
+            animation: winnerGlow 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes winnerGlow {
+            from { text-shadow: 0 0 20px #ffff00; }
+            to { text-shadow: 0 0 30px #ffff00, 0 0 40px #ffff00; }
+        }
+
+        .reset-btn {
+            display: block;
+            margin: 0 auto;
+            background: linear-gradient(45deg, #660066, #990099);
+            border: 3px solid #ff00ff;
+            border-radius: 10px;
+            color: #ff00ff;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 15px 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .reset-btn:hover {
+            background: linear-gradient(45deg, #990099, #cc00cc);
+            box-shadow: 0 0 20px #ff00ff;
+            transform: scale(1.05);
+        }
+
+        .instructions {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ffff00;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .instructions h3 {
+            color: #ffff00;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .instructions p {
+            color: #00ff00;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 2rem; }
+            .controls { grid-template-columns: 1fr; }
+            .health-bars { flex-direction: column; gap: 15px; }
+            .battle-arena { height: 250px; padding: 15px 30px; }
+            .fighter { width: 80px; height: 110px; }
+            .fighter-head { width: 20px; height: 20px; }
+            .fighter-body { width: 16px; height: 32px; }
+            .arm { width: 12px; height: 20px; }
+            .leg { width: 10px; height: 28px; }
+            .fighter-face { font-size: 6px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="title">⚡ RETRO FIGHTER ⚡</h1>
+        
+        <div class="game-screen">
+            <div class="health-bars">
+                <div class="player-info">
+                    <div class="player-name">PLAYER 1</div>
+                    <div class="health-bar-container">
+                        <div class="health-bar" id="health1" style="width: 100%"></div>
+                        <div class="health-text" id="healthText1">100/100</div>
+                    </div>
+                </div>
+                <div class="player-info">
+                    <div class="player-name">PLAYER 2</div>
+                    <div class="health-bar-container">
+                        <div class="health-bar" id="health2" style="width: 100%"></div>
+                        <div class="health-text" id="healthText2">100/100</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="battle-arena">
+                <div class="fighter player1 idle" id="fighter1">
+                    <div class="fighter-character">
+                        <div class="fighter-head">
+                            <div class="fighter-face">😤</div>
+                        </div>
+                        <div class="fighter-body">
+                            <div class="fighter-arms">
+                                <div class="arm"></div>
+                                <div class="arm"></div>
+                            </div>
+                        </div>
+                        <div class="fighter-legs">
+                            <div class="leg"></div>
+                            <div class="leg"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="fighter player2 idle" id="fighter2">
+                    <div class="fighter-character">
+                        <div class="fighter-head">
+                            <div class="fighter-face">😠</div>
+                        </div>
+                        <div class="fighter-body">
+                            <div class="fighter-arms">
+                                <div class="arm"></div>
+                                <div class="arm"></div>
+                            </div>
+                        </div>
+                        <div class="fighter-legs">
+                            <div class="leg"></div>
+                            <div class="leg"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-status" id="gameStatus">READY TO FIGHT!</div>
+
+            <div class="controls">
+                <div class="control-panel">
+                    <div class="control-title">PLAYER 1 CONTROLS</div>
+                    <div class="control-buttons">
+                        <button class="control-btn" onclick="attack(1)">PUNCH</button>
+                        <button class="control-btn" onclick="kick(1)">KICK</button>
+                        <button class="control-btn" onclick="block(1)">BLOCK</button>
+                        <button class="control-btn" onclick="special(1)">SPECIAL</button>
+                    </div>
+                </div>
+                <div class="control-panel">
+                    <div class="control-title">PLAYER 2 CONTROLS</div>
+                    <div class="control-buttons">
+                        <button class="control-btn" onclick="attack(2)">PUNCH</button>
+                        <button class="control-btn" onclick="kick(2)">KICK</button>
+                        <button class="control-btn" onclick="block(2)">BLOCK</button>
+                        <button class="control-btn" onclick="special(2)">SPECIAL</button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="reset-btn" onclick="resetGame()">NEW FIGHT</button>
+        </div>
+
+        <div class="instructions">
+            <h3>🎮 HOW TO PLAY</h3>
+            <p><strong>PUNCH:</strong> Quick attack (15 damage) • <strong>KICK:</strong> Strong attack (25 damage)</p>
+            <p><strong>BLOCK:</strong> Reduce incoming damage by 50% • <strong>SPECIAL:</strong> Powerful move (35 damage, limited uses)</p>
+            <p>First fighter to reach 0 health loses! Each player gets 3 special attacks per fight.</p>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            player1: { health: 100, maxHealth: 100, blocking: false, specials: 3 },
+            player2: { health: 100, maxHealth: 100, blocking: false, specials: 3 },
+            gameOver: false,
+            lastAction: null
+        };
+
+        function updateHealthBar(player) {
+            const healthBar = document.getElementById(`health${player}`);
+            const healthText = document.getElementById(`healthText${player}`);
+            const currentHealth = gameState[`player${player}`].health;
+            const maxHealth = gameState[`player${player}`].maxHealth;
+            
+            const percentage = (currentHealth / maxHealth) * 100;
+            healthBar.style.width = percentage + '%';
+            healthText.textContent = `${currentHealth}/${maxHealth}`;
+        }
+
+        function showAction(player, action) {
+            const fighter = document.getElementById(`fighter${player}`);
+            const status = document.getElementById('gameStatus');
+            const face = fighter.querySelector('.fighter-face');
+            
+            // Remove idle animation and add action animation
+            fighter.classList.remove('idle');
+            
+            if (action === 'SPECIAL ATTACK') {
+                fighter.classList.add('special-attack');
+                face.textContent = '😡';
+            } else if (action === 'BLOCK') {
+                fighter.classList.add('blocking');
+                face.textContent = '🛡️';
+            } else {
+                fighter.classList.add('attacking');
+                face.textContent = '😤';
+            }
+            
+            status.textContent = `PLAYER ${player} ${action.toUpperCase()}!`;
+            
+            setTimeout(() => {
+                fighter.classList.remove('attacking', 'special-attack', 'blocking');
+                fighter.classList.add('idle');
+                face.textContent = player === 1 ? '😤' : '😠';
+                
+                if (!gameState.gameOver) {
+                    status.textContent = 'READY TO FIGHT!';
+                }
+            }, action === 'BLOCK' ? 2000 : 600);
+        }
+
+        function takeDamage(player, damage, attacker) {
+            const defender = gameState[`player${player}`];
+            const attackerNum = attacker;
+            
+            // Apply blocking reduction
+            if (defender.blocking) {
+                damage = Math.floor(damage * 0.5);
+                document.getElementById('gameStatus').textContent = `PLAYER ${player} BLOCKED! (${damage} damage)`;
+            }
+            
+            defender.health = Math.max(0, defender.health - damage);
+            defender.blocking = false; // Reset block after taking damage
+            
+            // Visual hit effect
+            const fighter = document.getElementById(`fighter${player}`);
+            const face = fighter.querySelector('.fighter-face');
+            
+            fighter.classList.remove('idle');
+            fighter.classList.add('hit');
+            face.textContent = '😵';
+            
+            setTimeout(() => {
+                fighter.classList.remove('hit');
+                fighter.classList.add('idle');
+                face.textContent = player === 1 ? '😤' : '😠';
+            }, 500);
+            
+            updateHealthBar(player);
+            checkGameOver();
+        }
+
+        function attack(player) {
+            if (gameState.gameOver) return;
+            
+            const opponent = player === 1 ? 2 : 1;
+            const damage = 15;
+            
+            showAction(player, 'PUNCH');
+            setTimeout(() => takeDamage(opponent, damage, player), 200);
+        }
+
+        function kick(player) {
+            if (gameState.gameOver) return;
+            
+            const opponent = player === 1 ? 2 : 1;
+            const damage = 25;
+            
+            showAction(player, 'KICK');
+            setTimeout(() => takeDamage(opponent, damage, player), 200);
+        }
+
+        function block(player) {
+            if (gameState.gameOver) return;
+            
+            gameState[`player${player}`].blocking = true;
+            showAction(player, 'BLOCK');
+            
+            // Block lasts for 2 seconds
+            setTimeout(() => {
+                if (!gameState.gameOver) {
+                    gameState[`player${player}`].blocking = false;
+                }
+            }, 2000);
+        }
+
+        function special(player) {
+            if (gameState.gameOver) return;
+            
+            const playerData = gameState[`player${player}`];
+            if (playerData.specials <= 0) {
+                document.getElementById('gameStatus').textContent = `PLAYER ${player} - NO SPECIALS LEFT!`;
+                setTimeout(() => {
+                    if (!gameState.gameOver) {
+                        document.getElementById('gameStatus').textContent = 'READY TO FIGHT!';
+                    }
+                }, 1000);
+                return;
+            }
+            
+            const opponent = player === 1 ? 2 : 1;
+            const damage = 35;
+            
+            playerData.specials--;
+            showAction(player, 'SPECIAL ATTACK');
+            setTimeout(() => takeDamage(opponent, damage, player), 200);
+        }
+
+        function checkGameOver() {
+            if (gameState.player1.health <= 0) {
+                gameState.gameOver = true;
+                document.getElementById('gameStatus').innerHTML = '<span class="winner">🏆 PLAYER 2 WINS! 🏆</span>';
+            } else if (gameState.player2.health <= 0) {
+                gameState.gameOver = true;
+                document.getElementById('gameStatus').innerHTML = '<span class="winner">🏆 PLAYER 1 WINS! 🏆</span>';
+            }
+        }
+
+        function resetGame() {
+            gameState = {
+                player1: { health: 100, maxHealth: 100, blocking: false, specials: 3 },
+                player2: { health: 100, maxHealth: 100, blocking: false, specials: 3 },
+                gameOver: false,
+                lastAction: null
+            };
+            
+            updateHealthBar(1);
+            updateHealthBar(2);
+            document.getElementById('gameStatus').textContent = 'READY TO FIGHT!';
+            
+            // Reset fighter animations and faces
+            const fighter1 = document.getElementById('fighter1');
+            const fighter2 = document.getElementById('fighter2');
+            
+            fighter1.className = 'fighter player1 idle';
+            fighter2.className = 'fighter player2 idle';
+            
+            fighter1.querySelector('.fighter-face').textContent = '😤';
+            fighter2.querySelector('.fighter-face').textContent = '😠';
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', function(event) {
+            if (gameState.gameOver) return;
+            
+            switch(event.key.toLowerCase()) {
+                // Player 1 controls (WASD + Space)
+                case 'q': attack(1); break;
+                case 'w': kick(1); break;
+                case 'e': block(1); break;
+                case 'r': special(1); break;
+                
+                // Player 2 controls (Arrow keys + Enter)
+                case 'u': attack(2); break;
+                case 'i': kick(2); break;
+                case 'o': block(2); break;
+                case 'p': special(2); break;
+            }
+        });
+
+        // Initialize game
+        resetGame();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96699dbcc29cbc4f',t:'MTc1Mzc2MDY1MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
